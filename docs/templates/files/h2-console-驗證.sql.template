@@ -1,0 +1,22 @@
+-- H2 Console 驗證 SQL（公版）
+-- 使用前：替換 {{TABLE_USERS}}、{{TABLE_MAIN}} 等佔位符
+-- 執行位置：http://localhost:{{BACKEND_PORT}}/h2-console
+-- JDBC URL：{{H2_JDBC}}  帳號 {{H2_USER}}  密碼（空白）
+
+-- 1. 確認連到正確資料庫
+SELECT 'connected' AS status;
+
+-- 2. 列出所有表
+SHOW TABLES;
+
+-- 3. 使用者表
+SELECT id, username, role, enabled, created_at
+FROM {{TABLE_USERS}};
+
+-- 4. 主業務表
+SELECT *
+FROM {{TABLE_MAIN}}
+ORDER BY id DESC;
+
+-- 5. 筆數統計
+SELECT COUNT(*) AS row_count FROM {{TABLE_MAIN}};

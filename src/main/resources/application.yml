@@ -1,0 +1,61 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: trading-crud
+  datasource:
+    url: ${DB_URL:jdbc:h2:mem:tradingcrud;DB_CLOSE_DELAY=-1;MODE=PostgreSQL}
+    username: ${DB_USERNAME:sa}
+    password: ${DB_PASSWORD:}
+    driver-class-name: ${DB_DRIVER:org.h2.Driver}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: false
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+app:
+  jwt:
+    # HS256 secret（至少 32 bytes）；正式環境請以環境變數覆寫
+    secret: ${JWT_SECRET:trading-crud-dev-secret-key-change-me-please-32bytes}
+    expiration-minutes: ${JWT_EXPIRATION_MINUTES:120}
+    issuer: trading-crud
+  admin:
+    username: ${ADMIN_USERNAME:admin}
+    password: ${ADMIN_PASSWORD:admin123}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+# IntelliJ／bootRun 啟動後 Console 印常用 URL（見 StartupInfoLogger）
+startup:
+  info:
+    enabled: true
+    project-name: TradingCRUD
+    frontend: vite            # none | static | vite
+    auth: true
+    h2: true
+    api-docs: true
+    frontend-port: 5173
+    home-path: /orders
+    login-path: /login
+    default-user: admin
+    default-pass: admin123
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+logging:
+  level:
+    org.springframework.security: INFO

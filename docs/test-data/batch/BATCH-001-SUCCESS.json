@@ -1,0 +1,25 @@
+{
+  "orders": [
+    {
+      "clientOrderId": "batch-001-a",
+      "symbol": "BTCUSDT",
+      "side": "BUY",
+      "quantity": 0.5,
+      "price": 65000.00
+    },
+    {
+      "clientOrderId": "batch-001-b",
+      "symbol": "ETHUSDT",
+      "side": "SELL",
+      "quantity": 3,
+      "price": 3200.00
+    },
+    {
+      "clientOrderId": "batch-001-c",
+      "symbol": "SOLUSDT",
+      "side": "BUY",
+      "quantity": 10,
+      "price": 145.50
+    }
+  ]
+}

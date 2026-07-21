@@ -1,0 +1,8 @@
+flowchart LR
+  subgraph dev [dev]
+    V1[Vue :5173] -->|Vite proxy| SB[Spring :8083]
+  end
+  subgraph prod [prod]
+    BFF[Node BFF :3000] --> SB
+  end
+  SB --> DB[(DB)]

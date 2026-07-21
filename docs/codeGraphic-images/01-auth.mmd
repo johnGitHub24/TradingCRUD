@@ -1,0 +1,9 @@
+sequenceDiagram
+  participant V as Vue
+  participant S as Spring :8083
+  participant F as JwtFilter
+  V->>S: POST /auth/login
+  S-->>V: JWT token
+  V->>F: API + Bearer
+  F->>F: validate roles
+  F-->>V: 2xx

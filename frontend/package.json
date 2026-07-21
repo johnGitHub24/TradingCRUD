@@ -1,0 +1,33 @@
+{
+  "_comments": {
+    "說明": "此欄位僅供教學註解，npm 會忽略底線開頭的自訂欄位，不影響安裝與執行",
+    "name": "專案名稱，發布到 npm 時使用（本專案 private: true 不會發布）",
+    "type": "module 表示使用 ES Module（import/export），與 CommonJS（require）不同",
+    "scripts.dev": "啟動 Vite 開發伺服器（預設 http://localhost:5173），支援熱更新 HMR",
+    "scripts.build": "將 Vue 專案打包成靜態檔，輸出至 vite.config.js 設定的 outDir",
+    "scripts.preview": "本地預覽 build 後的產物，模擬正式環境行為",
+    "dependencies.vue": "Vue 3 核心框架 — 響應式 UI、元件化、Composition API",
+    "dependencies.vue-router": "Vue 官方路由 — 管理 /login、/orders 等網址與頁面對應",
+    "dependencies.axios": "HTTP 客戶端 — 封裝在 src/api/client.js，負責呼叫後端 REST API",
+    "devDependencies.vite": "建置工具 — 開發伺服器、打包、proxy 等",
+    "devDependencies.@vitejs/plugin-vue": "讓 Vite 能編譯 .vue 單檔元件的外掛"
+  },
+  "name": "trading-crud-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "axios": "^1.7.9",
+    "vue": "^3.5.13",
+    "vue-router": "^4.5.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.2.1",
+    "vite": "^6.0.7"
+  }
+}

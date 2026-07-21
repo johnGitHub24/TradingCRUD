@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<!--
+  =============================================================================
+  index.html — Vue SPA 的 HTML 殼層（Shell Page）
+  =============================================================================
+
+  【這個檔案是什麼？】
+  整個前端應用「只有這一個」HTML 頁面，稱為 SPA（Single Page Application，單頁應用）。
+  使用者看到的「登入頁」「訂單頁」都不是獨立 HTML，而是由 Vue Router 在
+  <div id="app"> 內動態切換元件（LoginView.vue ↔ OrdersView.vue）。
+
+  【學習重點 — SPA 運作流程】
+  1. 瀏覽器載入 index.html
+  2. <script src="/src/main.js"> 啟動 Vue 應用
+  3. main.js 把 App.vue 掛載到 #app
+  4. Vue Router 依網址（/login、/orders）決定顯示哪個 View 元件
+  5. 切換頁面時瀏覽器不會整頁重新載入，只更新 #app 內的 DOM
+
+  【為什麼 Bootstrap 從 CDN 載入？】
+  本教學專注 Vue 邏輯，UI 框架用 CDN 快速取得樣式，無需 npm install bootstrap。
+  正式專案可改為 npm 安裝並在 main.js 引入，以利離線部署與版本鎖定。
+-->
+<html lang="zh-Hant">
+  <head>
+    <!-- charset UTF-8：支援繁體中文等 Unicode 字元 -->
+    <meta charset="UTF-8" />
+
+    <!-- viewport：讓手機／平板也能正確縮放顯示（響應式設計基礎） -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>TradingCRUD — 訂單管理</title>
+
+    <!--
+      Bootstrap 5 CSS — 全站 UI 框架
+      提供：表格樣式、按鈕、卡片、Modal、Navbar、Toast 等元件的預設外觀
+    -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+
+    <!--
+      Bootstrap Icons — 圖示字型
+      用法：<i class="bi bi-person-circle"></i> 即可顯示圖示，無需額外 img 標籤
+    -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+  </head>
+  <body>
+    <!--
+      【Vue 掛載點 — 最重要的 DOM 節點】
+      main.js 執行 createApp(App).mount('#app') 時，Vue 會把 App.vue 的 template
+      渲染成 HTML 並插入這個 div。之後所有 Vue 元件都在這個節點的子樹內運作。
+    -->
+    <div id="app"></div>
+
+    <!--
+      【Vite 入口腳本】
+      type="module"：使用 ES Module 語法（import/export），Vite 開發時會即時編譯
+      src="/src/main.js"：應用程式進入點，負責建立 Vue 實例、註冊 Router、掛載 #app
+      build 後 Vite 會把此 script 標籤替換成打包後的 hash 檔名（如 app.a1b2c3.js）
+    -->
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

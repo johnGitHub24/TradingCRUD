@@ -1,0 +1,137 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.2.2'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com.trading'
+version = '0.1.0-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0'
+
+    implementation 'io.jsonwebtoken:jjwt-api:0.12.6'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.6'
+    runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
+
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+
+    runtimeOnly 'com.h2database:h2'
+    runtimeOnly 'org.postgresql:postgresql'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+    testCompileOnly 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
+}
+
+def testJvmArgs = ['-Djdk.attach.allowAttachSelf=true']
+
+tasks.named('test') {
+    description = 'Runs unit tests (excludes @Tag integration)'
+    workingDir = rootProject.projectDir
+    maxParallelForks = 1
+    minHeapSize = '128m'
+    maxHeapSize = '512m'
+    jvmArgs = testJvmArgs
+    useJUnitPlatform {
+        excludeTags 'integration'
+    }
+}
+
+tasks.register('integrationTest', Test) {
+    description = 'Runs integration tests (@Tag integration)'
+    group = 'verification'
+    workingDir = rootProject.projectDir
+    maxParallelForks = 1
+    jvmArgs = testJvmArgs
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    useJUnitPlatform {
+        includeTags 'integration'
+    }
+    shouldRunAfter tasks.named('test')
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('integrationTest')
+}
+
+tasks.named('javadoc') {
+    description = 'Generates HTML API documentation (JavaDoc standard)'
+    group = 'documentation'
+    options.encoding = 'UTF-8'
+    options.charSet = 'UTF-8'
+    options.docEncoding = 'UTF-8'
+    options.author = true
+    options.version = true
+    options.windowTitle = 'TradingCRUD API Documentation'
+    options.docTitle = 'TradingCRUD JavaDoc'
+    options.bottom = 'TradingCRUD &copy; 2026'
+    options.linkSource = true
+    options.addStringOption('Xdoclint:none', '-quiet')
+    if (JavaVersion.current().isJava9Compatible()) {
+        options.addBooleanOption('html5', true)
+    }
+}
+
+tasks.named('build') {
+    dependsOn tasks.named('check')
+}
+
+// 明確指定 Spring Boot 主類別，讓 Gradle bootRun 與 IntelliJ 一致辨識
+springBoot {
+    mainClass = 'com.trading.crud.TradingCrudApplication'
+}
+
+tasks.named('bootRun') {
+    group = 'application'
+    description = 'Run backend at http://localhost:8083'
+}
+
+/** Vue Vite 開發伺服器（:5173），供 IntelliJ Full Stack / Gradle Run 使用 */
+tasks.register('startFrontend', Exec) {
+    group = 'application'
+    description = 'Start Vue frontend at http://localhost:5173'
+    workingDir = file('frontend')
+    if (System.getProperty('os.name').toLowerCase().contains('windows')) {
+        commandLine 'cmd', '/c', 'npm run dev'
+    } else {
+        commandLine 'npm', 'run', 'dev'
+    }
+    standardInput = System.in
+    doFirst {
+        if (!file('frontend/node_modules').exists()) {
+            exec {
+                workingDir = file('frontend')
+                if (System.getProperty('os.name').toLowerCase().contains('windows')) {
+                    commandLine 'cmd', '/c', 'npm install'
+                } else {
+                    commandLine 'npm', 'install'
+                }
+            }
+        }
+        logger.lifecycle('')
+        logger.lifecycle('========== TradingCRUD 前端 ==========')
+        logger.lifecycle('登入頁    : http://localhost:5173/login')
+        logger.lifecycle('預設帳號  : admin / admin123')
+        logger.lifecycle('======================================')
+        logger.lifecycle('')
+    }
+}

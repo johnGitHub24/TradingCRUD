@@ -1,0 +1,13 @@
+flowchart TB
+  subgraph sec [security]
+    JF[JwtAuthenticationFilter]
+    SC[SecurityConfig]
+  end
+  subgraph app [domain packages]
+    AC[AuthController]
+    OC[OrderController]
+    OS[OrderService]
+  end
+  JF --> OC
+  AC --> OS
+  OC --> OS

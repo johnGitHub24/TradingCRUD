@@ -1,0 +1,5 @@
+flowchart TB
+  OC[OrderController] --> OS[OrderService]
+  OS --> OR[OrderRepository]
+  OR --> DB[(app_users + orders)]
+  BATCH[BATCH endpoints] --> OS
