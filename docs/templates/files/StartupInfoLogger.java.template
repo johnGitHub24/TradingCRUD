@@ -7,12 +7,16 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 /**
  * 應用就緒後於 Console 印出常用 URL。開關見 application.yml → startup.info.*
+ * 編碼：UTF-8 PrintStream + JVM -Dstdout.encoding=UTF-8 + IDE Console UTF-8
+ * （見 eos-minimal/knowledge/startup-info-logger-encoding.md）
  * 套用：複製本檔、改 package，並貼上對應 YAML 片段（static／vite／api-only）。
  */
 @Component
@@ -35,49 +39,55 @@ public class StartupInfoLogger implements ApplicationListener<ApplicationReadyEv
         boolean h2 = env.getProperty("startup.info.h2", Boolean.class, true);
         boolean apiDocs = env.getProperty("startup.info.api-docs", Boolean.class, true);
 
-        System.out.println();
-        System.out.println("╔════════════════════════════════════════════════════════════════════════╗");
-        System.out.printf("║  %-70s║%n", project + " 後端已啟動 — 使用連結");
-        System.out.println("╠════════════════════════════════════════════════════════════════════════╣");
-        System.out.println("║ 【後端 API / 工具】                                                      ║");
-        System.out.printf("║   健康檢查     %s%n", base + "/actuator/health");
-        System.out.printf("║   應用資訊     %s%n", base + "/actuator/info");
+        PrintStream out = utf8Out();
+        out.println();
+        out.println("╔════════════════════════════════════════════════════════════════════════╗");
+        out.printf("║  %-70s║%n", project + " 後端已啟動 — 使用連結");
+        out.println("╠════════════════════════════════════════════════════════════════════════╣");
+        out.println("║ 【後端 API / 工具】                                                      ║");
+        out.printf("║   健康檢查     %s%n", base + "/actuator/health");
+        out.printf("║   應用資訊     %s%n", base + "/actuator/info");
         if (apiDocs) {
-            System.out.printf("║   Swagger UI   %s%n", base + "/swagger-ui.html");
-            System.out.printf("║   OpenAPI JSON %s%n", base + "/v3/api-docs");
+            out.printf("║   Swagger UI   %s%n", base + "/swagger-ui.html");
+            out.printf("║   OpenAPI JSON %s%n", base + "/v3/api-docs");
         }
         if (h2) {
-            System.out.printf("║   H2 Console   %s%n", base + "/h2-console");
+            out.printf("║   H2 Console   %s%n", base + "/h2-console");
             String jdbc = env.getProperty("spring.datasource.url", "{{H2_JDBC}}");
-            System.out.printf("║   H2 JDBC URL  %s  帳號 sa  密碼 (空白)%n", jdbc);
+            out.printf("║   H2 JDBC URL  %s  帳號 sa  密碼 (空白)%n", jdbc);
         }
 
         if (!"none".equalsIgnoreCase(frontend)) {
-            System.out.println("╠════════════════════════════════════════════════════════════════════════╣");
+            out.println("╠════════════════════════════════════════════════════════════════════════╣");
             if ("static".equalsIgnoreCase(frontend)) {
-                System.out.println("║ 【前台】同埠靜態資源                                                      ║");
-                System.out.printf("║   首頁         %s%n", base + env.getProperty("startup.info.home-path", "/"));
+                out.println("║ 【前台】同埠靜態資源                                                      ║");
+                out.printf("║   首頁         %s%n", base + env.getProperty("startup.info.home-path", "/"));
                 for (String path : extraPaths(env)) {
-                    System.out.printf("║   額外         %s%n", base + path);
+                    out.printf("║   額外         %s%n", base + path);
                 }
             } else if ("vite".equalsIgnoreCase(frontend)) {
                 String feBase = "http://localhost:" + env.getProperty("startup.info.frontend-port", "{{FRONTEND_PORT}}");
-                System.out.println("║ 【前台 Vue】需另執行 Frontend (Vite) 或 Full Stack                         ║");
+                out.println("║ 【前台 Vue】需另執行 Frontend (Vite) 或 Full Stack                         ║");
                 if (auth) {
-                    System.out.printf("║   登入頁       %s%n", feBase + env.getProperty("startup.info.login-path", "/login"));
+                    out.printf("║   登入頁       %s%n", feBase + env.getProperty("startup.info.login-path", "/login"));
                 }
-                System.out.printf("║   主頁         %s%n", feBase + env.getProperty("startup.info.home-path", "/"));
+                out.printf("║   主頁         %s%n", feBase + env.getProperty("startup.info.home-path", "/"));
             }
             if (auth) {
-                System.out.printf("║   預設帳號     %s / %s%n",
+                out.printf("║   預設帳號     %s / %s%n",
                         env.getProperty("startup.info.default-user", "{{DEFAULT_USER}}"),
                         env.getProperty("startup.info.default-pass", "{{DEFAULT_PASS}}"));
             }
         }
 
-        System.out.println("╚════════════════════════════════════════════════════════════════════════╝");
-        System.out.println();
-        log.info("{} ready — frontend={} | {}", project, frontend, base + "/actuator/health");
+        out.println("╚════════════════════════════════════════════════════════════════════════╝");
+        out.println();
+        log.info("{} ready - frontend={} | {}", project, frontend, base + "/actuator/health");
+    }
+
+    /** UTF-8 banner；需 JVM stdout.encoding=UTF-8 與 IDE Console UTF-8。 */
+    private static PrintStream utf8Out() {
+        return new PrintStream(System.out, true, StandardCharsets.UTF_8);
     }
 
     private static List<String> extraPaths(Environment env) {
