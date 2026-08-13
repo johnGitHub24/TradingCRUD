@@ -1,74 +1,56 @@
-# TradingCRUD — 架構學習導引
+# Architecture — TradingCRUD
 
-> 把規格書、程式碼、前後端串成一條可走的路。  
-> **建議時間：** 2～3 天（每天 1～2 小時）
+> 衝突以 [TradingCRUD 規格書.md](../TradingCRUD%20規格書.md) 為準。  
+> 本檔為 EOS 精簡入口；完整分層／學習路線見下方中文文件，**勿在此重複全文**。
 
----
+## Layers
 
-## 一、三層理解
+| Layer | Responsibility |
+|-------|----------------|
+| Frontend | Vue 3 + Vite（dev :5173） |
+| BFF | Node Express（prod :3000，proxy `/api`） |
+| Controller / API | HTTP、參數、`@Valid`、ResponseEntity |
+| Service | 商業邏輯、`@Transactional` |
+| Security | JWT Filter、角色 ADMIN／USER |
+| Repository / Entity | JPA → H2（dev/test）／PostgreSQL（prod） |
+
+## Module map
+
+| Module | Notes |
+|--------|-------|
+| Auth | `AuthController` — `POST /api/v1/auth/login`、`GET /auth/me` |
+| Order CRUD | `OrderController` — 單筆 CRUD |
+| Order BATCH | 批次新增／刪除（部分失敗 207） |
+| Frontend | `frontend/` Vue 訂單管理 UI |
+| BFF | `server/` 正式靜態 + API proxy |
+
+## Runtime
 
 ```text
-┌─────────────────────────────────────────────────────────┐
-│  L1 業務層：這系統在幹嘛？                               │
-│      登入拿 JWT → 帶 Token 做訂單 CRUD / 批次操作        │
-├─────────────────────────────────────────────────────────┤
-│  L2 架構層：誰負責什麼？                                 │
-│      Vue 前端 → Node BFF（可選）→ Spring Boot → DB      │
-├─────────────────────────────────────────────────────────┤
-│  L3 實作層：請求怎麼穿過程式？                           │
-│      AuthController → JwtFilter → OrderService → JPA    │
-└─────────────────────────────────────────────────────────┘
+Browser (Vue)
+  ├── 開發 :5173 ──Vite proxy──► Spring Boot :8083
+  └── 正式 :3000 ──Node BFF───► Spring Boot :8083
+                                    │
+                                    ▼
+                              H2 / PostgreSQL
+                              app_users · orders
 ```
 
----
+## 詳細文件（請由此深入）
 
-## 二、文件地圖
+| 文件 | 說明 |
+|------|------|
+| [架構學習導引.md](架構學習導引.md) | 三層理解、學習路線、文件地圖 |
+| [功能流程說明.md](功能流程說明.md) | 主要 API 流程 |
+| [資料庫設計.md](資料庫設計.md) | ER、Entity、SQL 驗證 |
+| [驗證設計.md](驗證設計.md) | 四層驗證、權限矩陣、錯誤碼 |
+| [前後端串接說明.md](前後端串接說明.md) | Vue ↔ Spring Boot |
+| [../API規格書.md](../API規格書.md) | 端點契約 |
+| [../TradingCRUD 規格書.md](../TradingCRUD%20規格書.md) | 權威驗收 |
 
-| 階段 | 讀這份 | 解決什麼 |
-|------|--------|----------|
-| 0. 鳥瞰 | 本文件 | 整體架構 |
-| 1. 能跑 | [`docs/architecture.md`](初學者學習說明書.md) | 啟動後端+前端 |
-| 2. 流程 | [`docs/architecture.md`](功能流程說明.md) | API 怎麼跑 |
-| 3. 互動 | [`docs/codeGraphic.html`](專案引導教學.html) | Mermaid 架構圖 |
-| 4. 前後端 | [`docs/前後端串接說明.md`](前後端串接說明.md) | Vue ↔ API 串接 |
-| 5. 資料庫 | [`docs/資料庫設計.md`](資料庫設計.md) | ER、JPA、SQL 驗證 |
-| 6. 驗證 | [`docs/驗證設計.md`](驗證設計.md) | 四層驗證、錯誤碼 |
-| 7. API | [`API規格書.md`](../API規格書.md) | 端點契約 |
-| 8. 測試 | [`docs/testing.md`](測試規格書.md) | Case ID |
-| 9. JavaDoc | `.\gradlew.bat javadoc` | 程式 API 文件 |
-| 10. 權威 | [`TradingCRUD 規格書.md`](../TradingCRUD%20規格書.md) | 驗收標準 |
+## Visual maps
 
----
-
-## 三、建議學習路線
-
-### Day 1：後端能跑 + 測試
-
-| 步驟 | 動作 | 驗收 |
-|------|------|------|
-| 1 | `.\scripts\check.ps1` | 全綠 |
-| 2 | `.\gradlew.bat bootRun` | :8083 可連 |
-| 3 | Swagger 登入 + Authorize | CRUD 成功 |
-| 4 | H2 Console + sql/01 | 表結構正確 |
-
-### Day 2：資料庫 + 驗證
-
-| 步驟 | 動作 | 驗收 |
-|------|------|------|
-| 1 | 讀 `docs/資料庫設計.md` | 能畫 ER |
-| 2 | 讀 `docs/驗證設計.md` | 能說四層驗證 |
-| 3 | 追蹤 OrderService.create | 能口述流程 |
-| 4 | `.\scripts\check.ps1` | 單元＋整合全綠 |
-
-### Day 3：前端整合
-
-| 步驟 | 動作 | 驗收 |
-|------|------|------|
-| 1 | `cd frontend && npm run dev` | :5173 登入成功 |
-| 2 | 讀 `frontend/src/api/client.js` | 理解 interceptor |
-| 3 | 手動 CRUD | UI 全流程 |
-| 4 | `npm run build` + `server/npm start` | BFF :3000 |
-
----
-
-*最後更新：2026-07-09*
+| 文件 | 用途 |
+|------|------|
+| [codeGraphic.html](codeGraphic.html) | Tab：JWT／Order／前端／套件（圖為主） |
+| [專案引導教學.html](專案引導教學.html) | 長文引導＋流程圖 |

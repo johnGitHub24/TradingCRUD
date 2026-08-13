@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Architecture — TradingCRUD</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg:#0f1419; --surface:#1a2332; --surface2:#243044; --border:#2d3a4f;
+      --text:#e6edf3; --muted:#8b9cb3; --accent:#3b82f6; --accent2:#10b981; --warn:#f59e0b;
+    }
+    * { box-sizing:border-box; }
+    body {
+      margin:0; font-family:"Segoe UI","Microsoft JhengHei",sans-serif;
+      background:var(--bg); color:var(--text); line-height:1.65;
+    }
+    .bar {
+      position:sticky; top:0; z-index:10;
+      display:flex; flex-wrap:wrap; align-items:center; gap:0.75rem;
+      padding:0.75rem 1.25rem; background:var(--surface);
+      border-bottom:1px solid var(--border);
+    }
+    .bar a { color:var(--accent); text-decoration:none; }
+    .bar .src { color:var(--muted); font-size:0.85rem; }
+    .bar .badge {
+      font-size:0.75rem; color:var(--warn); border:1px solid var(--warn);
+      border-radius:4px; padding:0.1rem 0.45rem;
+    }
+    main { max-width:880px; margin:0 auto; padding:1.5rem 1.25rem 3rem; }
+    h1,h2,h3,h4 { line-height:1.3; }
+    h1 { font-size:1.7rem; border-bottom:2px solid var(--accent); padding-bottom:0.4rem; }
+    h2 { font-size:1.3rem; margin-top:1.75rem; border-bottom:1px solid var(--border); padding-bottom:0.3rem; }
+    h3 { font-size:1.1rem; margin-top:1.25rem; color:var(--accent2); }
+    a { color:var(--accent); }
+    code, pre { font-family:Consolas,"Courier New",monospace; }
+    code { background:var(--surface2); padding:0.1rem 0.35rem; border-radius:4px; font-size:0.9em; }
+    pre { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:1rem; overflow-x:auto; }
+    pre code { background:transparent; padding:0; }
+    table { border-collapse:collapse; width:100%; margin:1rem 0; font-size:0.92rem; }
+    th, td { border:1px solid var(--border); padding:0.45rem 0.65rem; text-align:left; }
+    th { background:var(--surface2); }
+    blockquote {
+      margin:1rem 0; padding:0.5rem 0.9rem; border-left:3px solid var(--warn);
+      background:var(--surface2); color:var(--muted);
+    }
+    .mermaid { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:1rem; overflow-x:auto; }
+    hr { border:none; border-top:1px solid var(--border); margin:1.5rem 0; }
+    footer { max-width:880px; margin:0 auto; padding:0 1.25rem 2rem; color:var(--muted); font-size:0.8rem; }
+  </style>
+</head>
+<body>
+  <div class="bar">
+    <a href="codeGraphic.html">← CodeGraphic</a>
+    <span class="badge">companion HTML</span>
+    <span class="src">來源（權威）：architecture.md</span>
+  </div>
+  <main>
+<h1>Architecture — TradingCRUD</h1>
+<blockquote>
+<p>衝突以 <a href="../TradingCRUD%20%E8%A6%8F%E6%A0%BC%E6%9B%B8.html">TradingCRUD 規格書.md</a> 為準。<br />
+本檔為 EOS 精簡入口；完整分層／學習路線見下方中文文件，<strong>勿在此重複全文</strong>。</p>
+</blockquote>
+<h2>Layers</h2>
+<table>
+<thead>
+<tr>
+  <th>Layer</th>
+  <th>Responsibility</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Frontend</td>
+  <td>Vue 3 + Vite（dev :5173）</td>
+</tr>
+<tr>
+  <td>BFF</td>
+  <td>Node Express（prod :3000，proxy <code>/api</code>）</td>
+</tr>
+<tr>
+  <td>Controller / API</td>
+  <td>HTTP、參數、<code>@Valid</code>、ResponseEntity</td>
+</tr>
+<tr>
+  <td>Service</td>
+  <td>商業邏輯、<code>@Transactional</code></td>
+</tr>
+<tr>
+  <td>Security</td>
+  <td>JWT Filter、角色 ADMIN／USER</td>
+</tr>
+<tr>
+  <td>Repository / Entity</td>
+  <td>JPA → H2（dev/test）／PostgreSQL（prod）</td>
+</tr>
+</tbody>
+</table>
+<h2>Module map</h2>
+<table>
+<thead>
+<tr>
+  <th>Module</th>
+  <th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>Auth</td>
+  <td><code>AuthController</code> — <code>POST /api/v1/auth/login</code>、<code>GET /auth/me</code></td>
+</tr>
+<tr>
+  <td>Order CRUD</td>
+  <td><code>OrderController</code> — 單筆 CRUD</td>
+</tr>
+<tr>
+  <td>Order BATCH</td>
+  <td>批次新增／刪除（部分失敗 207）</td>
+</tr>
+<tr>
+  <td>Frontend</td>
+  <td><code>frontend/</code> Vue 訂單管理 UI</td>
+</tr>
+<tr>
+  <td>BFF</td>
+  <td><code>server/</code> 正式靜態 + API proxy</td>
+</tr>
+</tbody>
+</table>
+<h2>Runtime</h2>
+<pre><code class="language-text">Browser (Vue)
+  ├── 開發 :5173 ──Vite proxy──► Spring Boot :8083
+  └── 正式 :3000 ──Node BFF───► Spring Boot :8083
+                                    │
+                                    ▼
+                              H2 / PostgreSQL
+                              app_users · orders
+</code></pre>
+<h2>詳細文件（請由此深入）</h2>
+<table>
+<thead>
+<tr>
+  <th>文件</th>
+  <th>說明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><a href="%E6%9E%B6%E6%A7%8B%E5%AD%B8%E7%BF%92%E5%B0%8E%E5%BC%95.html">架構學習導引.md</a></td>
+  <td>三層理解、學習路線、文件地圖</td>
+</tr>
+<tr>
+  <td><a href="%E5%8A%9F%E8%83%BD%E6%B5%81%E7%A8%8B%E8%AA%AA%E6%98%8E.html">功能流程說明.md</a></td>
+  <td>主要 API 流程</td>
+</tr>
+<tr>
+  <td><a href="%E8%B3%87%E6%96%99%E5%BA%AB%E8%A8%AD%E8%A8%88.html">資料庫設計.md</a></td>
+  <td>ER、Entity、SQL 驗證</td>
+</tr>
+<tr>
+  <td><a href="%E9%A9%97%E8%AD%89%E8%A8%AD%E8%A8%88.html">驗證設計.md</a></td>
+  <td>四層驗證、權限矩陣、錯誤碼</td>
+</tr>
+<tr>
+  <td><a href="%E5%89%8D%E5%BE%8C%E7%AB%AF%E4%B8%B2%E6%8E%A5%E8%AA%AA%E6%98%8E.html">前後端串接說明.md</a></td>
+  <td>Vue ↔ Spring Boot</td>
+</tr>
+<tr>
+  <td><a href="../API%E8%A6%8F%E6%A0%BC%E6%9B%B8.html">../API規格書.md</a></td>
+  <td>端點契約</td>
+</tr>
+<tr>
+  <td><a href="../TradingCRUD%20%E8%A6%8F%E6%A0%BC%E6%9B%B8.html">../TradingCRUD 規格書.md</a></td>
+  <td>權威驗收</td>
+</tr>
+</tbody>
+</table>
+<h2>Visual maps</h2>
+<table>
+<thead>
+<tr>
+  <th>文件</th>
+  <th>用途</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td><a href="codeGraphic.html">codeGraphic.html</a></td>
+  <td>Tab：JWT／Order／前端／套件（圖為主）</td>
+</tr>
+<tr>
+  <td><a href="%E5%B0%88%E6%A1%88%E5%BC%95%E5%B0%8E%E6%95%99%E5%AD%B8.html">專案引導教學.html</a></td>
+  <td>長文引導＋流程圖</td>
+</tr>
+</tbody>
+</table>
+
+  </main>
+  <footer>由 eos-minimal/hooks/md-to-companion-html 產生 · 請改 .md 後重跑腳本 · 勿當權威契約</footer>
+  <script>
+    mermaid.initialize({ startOnLoad: true, theme: "dark", securityLevel: "loose" });
+  </script>
+</body>
+</html>

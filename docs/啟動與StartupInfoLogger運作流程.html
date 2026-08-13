@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TradingCRUD — 啟動與 StartupInfoLogger 運作流程</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --bg: #0f1419;
+      --surface: #1a2332;
+      --surface2: #243044;
+      --border: #2d3a4f;
+      --text: #e6edf3;
+      --muted: #8b9cb3;
+      --accent: #38bdf8;
+      --accent2: #3b82f6;
+      --ok: #34d399;
+      --warn: #f59e0b;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Segoe UI", "Microsoft JhengHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+    }
+    .layout { display: flex; min-height: 100vh; }
+    nav {
+      width: 260px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 1.5rem 1rem;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      flex-shrink: 0;
+    }
+    nav .brand {
+      font-size: 0.8rem;
+      color: var(--accent);
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+    nav h2 {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      margin: 1.1rem 0 0.45rem;
+    }
+    nav a {
+      display: block;
+      color: var(--muted);
+      text-decoration: none;
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+    }
+    nav a:hover { background: var(--surface2); color: var(--accent); }
+    main { flex: 1; padding: 2rem 2.5rem 4rem; max-width: 980px; }
+    header.hero {
+      background: linear-gradient(135deg, #0c2740 0%, #0f1419 70%);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+    header.hero h1 { font-size: 1.65rem; margin-bottom: 0.5rem; }
+    .subtitle { color: var(--muted); }
+    .badges { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem; }
+    .badge {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      padding: 0.25rem 0.75rem;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      color: var(--accent);
+    }
+    .one-liner {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 4px solid var(--ok);
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      margin: 1rem 0 1.5rem;
+      font-size: 0.95rem;
+      color: #c9d4e3;
+    }
+    section { margin-bottom: 2.5rem; scroll-margin-top: 1rem; }
+    section h2 {
+      font-size: 1.25rem;
+      border-bottom: 2px solid var(--accent);
+      padding-bottom: 0.5rem;
+      margin-bottom: 1rem;
+    }
+    section h3 { font-size: 1rem; color: var(--accent); margin: 1.25rem 0 0.5rem; }
+    p, li { color: #c9d4e3; margin-bottom: 0.5rem; }
+    ul, ol { padding-left: 1.25rem; margin-bottom: 0.75rem; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin: 1rem 0; }
+    th, td { border: 1px solid var(--border); padding: 0.5rem 0.75rem; text-align: left; vertical-align: top; }
+    th { background: var(--surface2); color: var(--accent); }
+    code {
+      background: #0d1117;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      color: #79c0ff;
+      font-size: 0.85em;
+    }
+    pre {
+      background: #0d1117;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      overflow-x: auto;
+      font-size: 0.82rem;
+      color: #a5d6ff;
+      margin: 1rem 0;
+      white-space: pre-wrap;
+    }
+    .mermaid {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem;
+      margin: 1rem 0;
+      overflow-x: auto;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+    }
+    .note {
+      background: var(--surface2);
+      border-left: 3px solid var(--warn);
+      padding: 0.75rem 1rem;
+      margin: 1rem 0;
+      font-size: 0.9rem;
+    }
+    .note.info { border-left-color: var(--accent2); }
+    .note.ok { border-left-color: var(--ok); }
+    .phase {
+      display: grid;
+      grid-template-columns: 3.5rem 1fr;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+      align-items: start;
+    }
+    .phase-num {
+      background: var(--accent2);
+      color: #fff;
+      font-weight: 700;
+      width: 2.25rem;
+      height: 2.25rem;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+    }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    a.link { color: var(--accent2); }
+    footer {
+      margin-top: 2rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+    @media (max-width: 768px) {
+      .layout { flex-direction: column; }
+      nav { width: 100%; height: auto; position: static; }
+      .grid-2 { grid-template-columns: 1fr; }
+      main { padding: 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="layout">
+  <nav>
+    <div class="brand">TradingCRUD</div>
+    <h2>啟動流程</h2>
+    <a href="#overview">總覽</a>
+    <a href="#entry">啟動入口</a>
+    <a href="#sequence">Sequence 圖</a>
+    <a href="#yaml">YAML → Environment</a>
+    <a href="#lifecycle">Spring 生命週期</a>
+    <a href="#decision">Logger 決策樹</a>
+    <a href="#division">Gradle vs YAML</a>
+    <a href="#after">啟動後業務路徑</a>
+    <a href="#siblings">其他專案對照</a>
+    <a href="#files">相關檔案</a>
+    <h2>相關</h2>
+    <a href="啟動與StartupInfoLogger運作流程.md">Markdown 版</a>
+    <a href="IntelliJ-IDE-啟動設定.md">IntelliJ 啟動設定</a>
+    <a href="templates/README.md">可複用範本</a>
+  </nav>
+
+  <main>
+    <header class="hero" id="overview">
+      <h1>系統啟動與 StartupInfoLogger</h1>
+      <p class="subtitle">從 Gradle／IntelliJ 到 Console 印出常用 URL 的完整 runtime 路徑</p>
+      <div class="badges">
+        <span class="badge">Spring Boot 3.2</span>
+        <span class="badge">Java 21</span>
+        <span class="badge">ApplicationReadyEvent</span>
+        <span class="badge">startup.info.*</span>
+        <span class="badge">:8083</span>
+      </div>
+    </header>
+
+    <div class="one-liner">
+      <strong>一句話：</strong>
+      <code>bootRun</code>／IntelliJ 只負責把 <code>TradingCrudApplication</code> 拉起來；
+      Spring 把 <code>application.yml</code> 灌進 <code>Environment</code> 並建好 Bean；
+      <code>DataSeeder</code> 先種 admin；Tomcat 開 <code>:8083</code> 後發
+      <code>ApplicationReadyEvent</code>；
+      <code>StartupInfoLogger</code> 再依 <code>startup.info.*</code> 決定 Console 印哪些連結。
+    </div>
+
+    <section id="entry">
+      <h2>1. 誰觸發啟動（三種入口，本質相同）</h2>
+      <table>
+        <tr><th>入口</th><th>實際做的事</th></tr>
+        <tr>
+          <td>IntelliJ <code>TradingCrudApplication</code></td>
+          <td>直接跑 <code>main</code>，主類 <code>com.trading.crud.TradingCrudApplication</code></td>
+        </tr>
+        <tr>
+          <td>IntelliJ / CLI <code>gradlew bootRun</code></td>
+          <td>Boot plugin 用 <code>build.gradle</code> 的 <code>springBoot.mainClass</code> 起同一支 <code>main</code></td>
+        </tr>
+        <tr>
+          <td><code>scripts/start.ps1</code></td>
+          <td>新視窗跑 <code>gradlew bootRun</code>，再另開 Vite <code>:5173</code>（前端與後端無關）</td>
+        </tr>
+      </table>
+      <pre>springBoot {
+    mainClass = 'com.trading.crud.TradingCrudApplication'
+}
+
+tasks.named('bootRun') {
+    group = 'application'
+    description = 'Run backend at http://localhost:8083'
+}</pre>
+      <div class="note info">
+        <code>bootRun</code> <strong>不會</strong>解析 <code>startup.info.*</code>；
+        YAML 是 JVM 起來後由 Spring 讀的。
+      </div>
+    </section>
+
+    <section id="sequence">
+      <h2>2. Sequence：從按 Run 到 Console 印框</h2>
+      <div class="mermaid">
+sequenceDiagram
+    autonumber
+    actor Dev as 開發者
+    participant Gradle as Gradle bootRun 或 IntelliJ
+    participant Main as TradingCrudApplication.main
+    participant SA as SpringApplication
+    participant Env as Environment
+    participant Ctx as ApplicationContext
+    participant Seeder as DataSeeder
+    participant Tomcat as Tomcat :8083
+    participant SIL as StartupInfoLogger
+
+    Dev->>Gradle: Run / bootRun / start.ps1
+    Gradle->>Main: 啟動 JVM + classpath
+    Main->>SA: SpringApplication.run
+
+    Note over SA,Env: A 環境與設定
+    SA->>Env: 載入 application.yml
+
+    Note over SA,Ctx: B 掃描與建 Bean
+    SA->>Ctx: ComponentScan
+    Ctx->>Ctx: Security / JPA / Actuator / SIL / Seeder
+
+    Note over Ctx,Seeder: C 容器就緒後
+    Ctx->>Seeder: CommandLineRunner.run
+    Seeder->>Seeder: 種子 admin
+
+    Note over Ctx,Tomcat: D Web 伺服器
+    Ctx->>Tomcat: 綁定 :8083
+
+    Note over Tomcat,SIL: E ApplicationReadyEvent
+    Tomcat-->>SA: 就緒
+    SA->>SIL: ApplicationReadyEvent
+    SIL->>Env: getProperty startup.info.*
+    alt enabled false
+        SIL-->>SIL: return
+    else enabled true
+        SIL->>Dev: System.out 印 URL
+        SIL->>Dev: log.info ready
+    end
+      </div>
+
+      <h3>五個階段速覽</h3>
+      <div class="phase"><div class="phase-num">A</div><div><strong>環境與設定</strong> — 載入 YAML／環境變數／命令列到 <code>Environment</code></div></div>
+      <div class="phase"><div class="phase-num">B</div><div><strong>掃描與建 Bean</strong> — <code>@SpringBootApplication</code> 掃描，建立 Security、JPA、StartupInfoLogger…</div></div>
+      <div class="phase"><div class="phase-num">C</div><div><strong>種子資料</strong> — <code>DataSeeder</code>（CommandLineRunner）確保 admin 存在</div></div>
+      <div class="phase"><div class="phase-num">D</div><div><strong>Web 伺服器</strong> — 內嵌 Tomcat 綁 <code>server.port=8083</code></div></div>
+      <div class="phase"><div class="phase-num">E</div><div><strong>Ready 事件</strong> — <code>StartupInfoLogger</code> 讀 <code>startup.info.*</code> 印 Console</div></div>
+    </section>
+
+    <section id="yaml">
+      <h2>3. YAML 何時進 Runtime</h2>
+      <p><code>src/main/resources/application.yml</code> 進 classpath；Spring 掛入 <code>Environment</code>（優先序大致：命令列 &gt; 環境變數 &gt; YAML）。</p>
+      <pre>startup:
+  info:
+    enabled: true
+    project-name: TradingCRUD
+    frontend: vite
+    auth: true
+    h2: true
+    api-docs: true
+    frontend-port: 5173
+    home-path: /orders
+    login-path: /login
+    default-user: admin
+    default-pass: admin123</pre>
+      <table>
+        <tr><th>YAML</th><th>用途</th></tr>
+        <tr><td><code>startup.info.enabled</code></td><td><code>false</code> 則整段不印</td></tr>
+        <tr><td><code>startup.info.project-name</code></td><td>框標題</td></tr>
+        <tr><td><code>server.port</code></td><td>組 <code>http://localhost:{port}</code></td></tr>
+        <tr><td><code>startup.info.frontend</code></td><td><code>none</code> / <code>static</code> / <code>vite</code></td></tr>
+        <tr><td><code>h2</code> / <code>api-docs</code> / <code>auth</code></td><td>條件區塊開關</td></tr>
+        <tr><td><code>spring.datasource.url</code></td><td>印 H2 JDBC（若 h2=true）</td></tr>
+      </table>
+      <div class="note ok">
+        <strong>改 YAML 不必改 Java。</strong>
+        <code>StartupInfoLogger</code> 只做「讀 Environment → 印字」。
+      </div>
+    </section>
+
+    <section id="lifecycle">
+      <h2>4. Spring 生命週期位置</h2>
+      <div class="mermaid">
+flowchart TB
+    A[main → SpringApplication.run] --> B[載入 Environment / YAML]
+    B --> C[建立 ApplicationContext]
+    C --> D[註冊 Component<br/>SIL + DataSeeder]
+    D --> E[Context refreshed]
+    E --> F[CommandLineRunner<br/>DataSeeder.run]
+    F --> G[WebServer started<br/>Tomcat :8083]
+    G --> H[ApplicationReadyEvent]
+    H --> I{startup.info.enabled?}
+    I -->|false| J[不印]
+    I -->|true| K[讀 frontend / h2 / api-docs]
+    K --> L[System.out + log.info]
+    L --> M[可服務狀態]
+      </div>
+      <div class="card">
+        <h3>為何聽 ApplicationReadyEvent？</h3>
+        <ul>
+          <li>建構子／<code>@PostConstruct</code> 時 Tomcat 可能還沒綁埠，印 URL 太早會誤導。</li>
+          <li><code>CommandLineRunner</code>（DataSeeder）在 Ready <strong>之前</strong>跑：先有 admin，再開門，再印連結。</li>
+        </ul>
+        <p style="margin-top:0.75rem;color:var(--muted);font-size:0.9rem;">
+          順序：Context refresh → CommandLineRunner → WebServer start → <strong>ApplicationReadyEvent</strong>
+        </p>
+      </div>
+    </section>
+
+    <section id="decision">
+      <h2>5. StartupInfoLogger 內部決策</h2>
+      <div class="mermaid">
+flowchart TD
+    Start[onApplicationEvent] --> E{enabled?}
+    E -->|否| X[return]
+    E -->|是| R[讀 project / port / frontend]
+    R --> P1[永遠印 health + info]
+    P1 --> P2{api-docs?}
+    P2 -->|是| S[Swagger + OpenAPI]
+    P2 -->|否| P3
+    S --> P3{h2?}
+    P3 -->|是| H[H2 Console + JDBC]
+    P3 -->|否| F
+    H --> F{frontend == none?}
+    F -->|是| End[關框 + log]
+    F -->|否| FT{frontend?}
+    FT -->|static| ST[同埠 home + extra]
+    FT -->|vite| V[另埠 Vite 連結]
+    ST --> A{auth?}
+    V --> A
+    A -->|是| Acc[預設帳密]
+    A -->|否| End
+    Acc --> End
+      </div>
+      <p>TradingCRUD 現行會走出：<strong>後端工具列 + Swagger + H2 + Vite 前台 + 預設帳密</strong>。</p>
+    </section>
+
+    <section id="division">
+      <h2>6. Gradle 與 YAML 的分工</h2>
+      <div class="mermaid">
+flowchart LR
+    subgraph Build["建置／指令層"]
+      G[build.gradle]
+      G --> M[mainClass]
+      G --> BR[bootRun]
+      G --> FE[startFrontend]
+    end
+    subgraph RT["JVM Runtime"]
+      Y[application.yml]
+      Y --> ENV[Environment]
+      ENV --> SIL[StartupInfoLogger]
+      ENV --> DS[DataSource / JWT]
+    end
+    BR -->|啟動 JVM| RT
+    FE -.->|不讀 startup.info| Vite[Vite :5173]
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <h3>Gradle</h3>
+          <p>編譯、哪個 main、<code>bootRun</code>、前端腳本</p>
+        </div>
+        <div class="card">
+          <h3>YAML + Logger</h3>
+          <p>埠、DB、JWT、Console 印什麼。<br/>Logger <strong>不</strong>啟動前端、不驗證 URL。</p>
+        </div>
+      </div>
+      <div class="note">
+        <code>start.ps1</code> 腳本層也印一輪 URL；
+        <code>StartupInfoLogger</code> 是後端就緒後再印（runtime）。來源不同、內容刻意對齊。
+      </div>
+    </section>
+
+    <section id="after">
+      <h2>7. 啟動後才發生的業務路徑</h2>
+      <pre>HTTP :8083 → Security Filter → Controller → Service → JPA / H2</pre>
+      <p>這與 <code>startup.info</code> <strong>無關</strong>；後者只影響開發 Console 輸出。</p>
+      <p>測試要安靜啟動可設：</p>
+      <pre>startup.info.enabled=false</pre>
+    </section>
+
+    <section id="siblings">
+      <h2>8. 其他專案是否同一作法？</h2>
+      <div class="note ok">
+        <strong>是。</strong> 同一條鏈：
+        <code>main</code> → YAML → Bean →（可選）CommandLineRunner → Tomcat → Ready → 印 URL。
+        差異只在 YAML／套件名／有無種子／有無前端。
+      </div>
+      <table>
+        <tr>
+          <th>專案</th><th>port</th><th>frontend</th><th>h2</th><th>api-docs</th><th>備註</th>
+        </tr>
+        <tr>
+          <td><strong>TradingCRUD</strong></td>
+          <td>8083</td><td>vite :5173</td><td>true</td><td>true</td>
+          <td>DataSeeder + JWT</td>
+        </tr>
+        <tr>
+          <td>TradingPagingList</td>
+          <td>8091</td><td>vite :5174</td><td>true</td><td>true</td>
+          <td>產品種子；無 auth</td>
+        </tr>
+        <tr>
+          <td>TradingFinTech</td>
+          <td>8092</td><td>none</td><td>true</td><td>true</td>
+          <td>API-only</td>
+        </tr>
+        <tr>
+          <td>TradingPrometheusActuator</td>
+          <td>8090</td><td>none</td><td>false</td><td>false</td>
+          <td>extra-paths 印 prometheus</td>
+        </tr>
+      </table>
+      <h3>套用三步驟</h3>
+      <ol>
+        <li>複製／改 package 的 <code>StartupInfoLogger.java</code></li>
+        <li><code>application.yml</code> 貼上對應 <code>startup.info.*</code></li>
+        <li>（可選）<code>build.gradle</code> 指定 <code>mainClass</code> + <code>bootRun</code></li>
+      </ol>
+      <p>範本：<a class="link" href="templates/README.md">docs/templates/</a></p>
+    </section>
+
+    <section id="files">
+      <h2>9. 相關檔案速查</h2>
+      <table>
+        <tr><th>檔案</th><th>角色</th></tr>
+        <tr><td><code>TradingCrudApplication.java</code></td><td>main 入口</td></tr>
+        <tr><td><code>build.gradle</code></td><td>mainClass、bootRun、startFrontend</td></tr>
+        <tr><td><code>application.yml</code></td><td>埠、DB、JWT、startup.info.*</td></tr>
+        <tr><td><code>config/StartupInfoLogger.java</code></td><td>聽 Ready、印 URL</td></tr>
+        <tr><td><code>config/DataSeeder.java</code></td><td>CommandLineRunner 種子 admin</td></tr>
+        <tr><td><code>scripts/start.ps1</code></td><td>一鍵後端 + 前端</td></tr>
+        <tr><td><code>.idea/runConfigurations/*</code></td><td>IntelliJ Run Config</td></tr>
+      </table>
+    </section>
+
+    <footer>
+      最後更新：2026-07-17 ·
+      來源：<a class="link" href="啟動與StartupInfoLogger運作流程.md">啟動與StartupInfoLogger運作流程.md</a>
+    </footer>
+  </main>
+</div>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'dark',
+    securityLevel: 'loose',
+    flowchart: { curve: 'basis', htmlLabels: true },
+    sequence: { mirrorActors: false, messageMargin: 30 }
+  });
+</script>
+</body>
+</html>

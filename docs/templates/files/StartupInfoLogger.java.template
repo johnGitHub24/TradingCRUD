@@ -1,0 +1,116 @@
+package {{PACKAGE}};
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.ApplicationListener;
+import org.springframework.core.env.Environment;
+import org.springframework.stereotype.Component;
+
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+/**
+ * 應用就緒後於 Console 印出常用 URL。開關見 application.yml → startup.info.*
+ * 編碼：UTF-8 PrintStream + JVM -Dstdout.encoding=UTF-8 + IDE Console UTF-8
+ * （見 eos-minimal/knowledge/startup-info-logger-encoding.md）
+ * 套用：複製本檔、改 package，並貼上對應 YAML 片段（static／vite／api-only）。
+ */
+@Component
+public class StartupInfoLogger implements ApplicationListener<ApplicationReadyEvent> {
+
+    private static final Logger log = LoggerFactory.getLogger(StartupInfoLogger.class);
+
+    @Override
+    public void onApplicationEvent(ApplicationReadyEvent event) {
+        Environment env = event.getApplicationContext().getEnvironment();
+        if (!env.getProperty("startup.info.enabled", Boolean.class, true)) {
+            return;
+        }
+
+        String project = env.getProperty("startup.info.project-name", "{{PROJECT_NAME}}");
+        String port = env.getProperty("server.port", "{{BACKEND_PORT}}");
+        String base = "http://localhost:" + port;
+        String frontend = env.getProperty("startup.info.frontend", "none");
+        boolean auth = env.getProperty("startup.info.auth", Boolean.class, false);
+        boolean h2 = env.getProperty("startup.info.h2", Boolean.class, true);
+        boolean apiDocs = env.getProperty("startup.info.api-docs", Boolean.class, true);
+
+        PrintStream out = utf8Out();
+        out.println();
+        out.println("╔════════════════════════════════════════════════════════════════════════╗");
+        out.printf("║  %-70s║%n", project + " 後端已啟動 — 使用連結");
+        out.println("╠════════════════════════════════════════════════════════════════════════╣");
+        out.println("║ 【後端 API / 工具】                                                      ║");
+        out.printf("║   健康檢查     %s%n", base + "/actuator/health");
+        out.printf("║   應用資訊     %s%n", base + "/actuator/info");
+        if (apiDocs) {
+            out.printf("║   Swagger UI   %s%n", base + "/swagger-ui.html");
+            out.printf("║   OpenAPI JSON %s%n", base + "/v3/api-docs");
+        }
+        if (h2) {
+            out.printf("║   H2 Console   %s%n", base + "/h2-console");
+            String jdbc = env.getProperty("spring.datasource.url", "{{H2_JDBC}}");
+            out.printf("║   H2 JDBC URL  %s  帳號 sa  密碼 (空白)%n", jdbc);
+        }
+
+        if (!"none".equalsIgnoreCase(frontend)) {
+            out.println("╠════════════════════════════════════════════════════════════════════════╣");
+            if ("static".equalsIgnoreCase(frontend)) {
+                out.println("║ 【前台】同埠靜態資源                                                      ║");
+                out.printf("║   首頁         %s%n", base + env.getProperty("startup.info.home-path", "/"));
+                for (String path : extraPaths(env)) {
+                    out.printf("║   額外         %s%n", base + path);
+                }
+            } else if ("vite".equalsIgnoreCase(frontend)) {
+                String feBase = "http://localhost:" + env.getProperty("startup.info.frontend-port", "{{FRONTEND_PORT}}");
+                out.println("║ 【前台 Vue】需另執行 Frontend (Vite) 或 Full Stack                         ║");
+                if (auth) {
+                    out.printf("║   登入頁       %s%n", feBase + env.getProperty("startup.info.login-path", "/login"));
+                }
+                out.printf("║   主頁         %s%n", feBase + env.getProperty("startup.info.home-path", "/"));
+            }
+            if (auth) {
+                out.printf("║   預設帳號     %s / %s%n",
+                        env.getProperty("startup.info.default-user", "{{DEFAULT_USER}}"),
+                        env.getProperty("startup.info.default-pass", "{{DEFAULT_PASS}}"));
+            }
+        }
+
+        out.println("╚════════════════════════════════════════════════════════════════════════╝");
+        out.println();
+        log.info("{} ready - frontend={} | {}", project, frontend, base + "/actuator/health");
+    }
+
+    /** UTF-8 banner；需 JVM stdout.encoding=UTF-8 與 IDE Console UTF-8。 */
+    private static PrintStream utf8Out() {
+        return new PrintStream(System.out, true, StandardCharsets.UTF_8);
+    }
+
+    private static List<String> extraPaths(Environment env) {
+        String first = env.getProperty("startup.info.extra-paths[0]");
+        if (first != null && !first.isBlank()) {
+            List<String> paths = new ArrayList<>();
+            for (int i = 0; ; i++) {
+                String p = env.getProperty("startup.info.extra-paths[" + i + "]");
+                if (p == null || p.isBlank()) {
+                    break;
+                }
+                paths.add(p.startsWith("/") ? p : "/" + p);
+            }
+            return paths;
+        }
+        String raw = env.getProperty("startup.info.extra-paths");
+        if (raw == null || raw.isBlank()) {
+            return List.of();
+        }
+        return Arrays.stream(raw.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .map(s -> s.startsWith("/") ? s : "/" + s)
+                .toList();
+    }
+}

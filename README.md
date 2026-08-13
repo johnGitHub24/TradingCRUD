@@ -32,6 +32,20 @@ JWT 認證 + Order CRUD/BATCH + **Vue 3 前端** + **Node.js BFF** 完整教學�
 | [docs/驗證設計.md](docs/驗證設計.md) | 驗證／權限 |
 | [CLAUDE.md](CLAUDE.md) | AI 薄規則 |
 | [scripts/README.md](scripts/README.md) | 驗證／啟動腳本 |
+| [docs/swagger.html](docs/swagger.html) | **API（Swagger／介面）** |
+
+### 教學（非權威，勿刪）
+
+| 文件 | 說明 |
+|------|------|
+| [docs/專案引導教學.html](docs/專案引導教學.html) | 教學 |
+| [docs/初學者學習說明書.md](docs/初學者學習說明書.md) | 教學 |
+| [docs/架構學習導引.md](docs/架構學習導引.md) | 教學 |
+| [docs/功能流程說明.md](docs/功能流程說明.md) | 教學 |
+| [docs/TradingCRUD-完整學習手冊.html](docs/TradingCRUD-完整學習手冊.html) | 教學 |
+| [docs/Vue與Nodejs技術介紹.md](docs/Vue與Nodejs技術介紹.md) | 教學 |
+| [docs/前後端串接說明.md](docs/前後端串接說明.md) | 教學 |
+| [docs/IntelliJ-IDE-啟動設定.md](docs/IntelliJ-IDE-啟動設定.md) | 教學 |
 
 ## 架構
 
