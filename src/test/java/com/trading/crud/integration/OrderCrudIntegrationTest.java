@@ -1,4 +1,4 @@
-package com.trading.crud.order;
+package com.trading.crud.integration;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.trading.crud.order.infrastructure.OrderRepository;
@@ -43,7 +43,7 @@ class OrderCrudIntegrationTest extends IntegrationTestBase {
     }
 
     /**
-     * CASE ORDER-001：建立成功回 201、status=NEW。
+     * CASE ORDER-001 / DTO-001：建立成功回 201、status=NEW。
      * Given: 合法 body；When: POST /orders；Then: 201 + DB 1 筆。
      */
     @Test
@@ -75,7 +75,7 @@ class OrderCrudIntegrationTest extends IntegrationTestBase {
     }
 
     /**
-     * CASE ORDER-003：缺必填回 400，DB 不變。
+     * CASE ORDER-003 / DTO-002：缺必填回 400，DB 不變。
      * Given: 缺欄位 body；When: POST；Then: 400、count=0。
      */
     @Test
@@ -91,7 +91,7 @@ class OrderCrudIntegrationTest extends IntegrationTestBase {
     }
 
     /**
-     * CASE ORDER-004：格式非法回 400。
+     * CASE ORDER-004 / DTO-003：格式非法回 400。
      * Given: 非法格式 body；When: POST；Then: 400 VALIDATION_FAILED。
      */
     @Test
@@ -123,7 +123,7 @@ class OrderCrudIntegrationTest extends IntegrationTestBase {
     }
 
     /**
-     * CASE ORDER-006：重複 clientOrderId 回 409。
+     * CASE ORDER-006 / SVC-001：重複 clientOrderId 回 409。
      * Given: 同 clientOrderId 已存在；When: 再 POST；Then: 409 DUPLICATE_ORDER、仍 1 筆。
      */
     @Test

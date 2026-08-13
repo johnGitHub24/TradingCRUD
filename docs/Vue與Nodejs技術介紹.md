@@ -186,7 +186,7 @@ npm run build
 | `npm run build` | 打包 |
 | `npm run preview` | 預覽打包結果 |
 
-專案腳本：`.\scripts\start-frontend.ps1` 或 IntelliJ **Frontend (Vite)**。
+專案腳本：`cd frontend; npm run dev` 或 IntelliJ **Frontend (Vite)**。
 
 ---
 
@@ -295,7 +295,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
 
 ```powershell
 # 1. 後端
-cd D:\ClaudeCode\TradingCRUD
+cd D:\SouceDemo\RemoteSpringBoot\TradingCRUD
 .\gradlew.bat bootRun
 
 # 2. 打包前端
@@ -395,10 +395,10 @@ sequenceDiagram
 
 ```powershell
 # 一鍵後端+前端（開發）
-.\scripts\start.ps1
+.\gradlew.bat bootRun
 
 # 只前端
-.\scripts\start-frontend.ps1
+cd frontend; npm run dev
 
 # IntelliJ
 Run → Full Stack

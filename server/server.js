@@ -24,12 +24,12 @@
  *
  * 【何時啟動本伺服器？】
  *   - 正式部署或整合測試時（前端已 npm run build）
- *   - 開發時若要用 Vite 熱更新，請改跑 scripts/start-frontend.ps1（:5173）
+ *   - 開發時若要用 Vite 熱更新，請改跑：cd frontend && npm run dev（:5173）
  *
  * 【啟動步驟】
  *   1. cd frontend && npm run build   （產生靜態檔到 server/public）
  *   2. cd server && npm start           （啟動本伺服器 :3000）
- *   3. 確保 Spring Boot 已在 :8083 運行（scripts/start.ps1 或 gradlew bootRun）
+ *   3. 確保 Spring Boot 已在 :8083 運行（.\gradlew.bat bootRun）
  *
  * 【環境變數】
  *   PORT        — BFF 監聽埠，預設 3000

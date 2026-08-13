@@ -1,4 +1,4 @@
-package com.trading.crud.security;
+package com.trading.crud.integration;
 
 import com.trading.crud.support.IntegrationTestBase;
 import com.trading.crud.user.domain.Role;
@@ -28,7 +28,7 @@ class SecurityIntegrationTest extends IntegrationTestBase {
     }
 
     /**
-     * CASE SEC-001：無 Token 存取受保護端點 → 401 UNAUTHORIZED。
+     * CASE SEC-001 / AUTH-005：無 Token 存取受保護端點 → 401 UNAUTHORIZED。
      * Given: 無 Authorization；When: GET /orders；Then: 401。
      */
     @Test
@@ -68,7 +68,7 @@ class SecurityIntegrationTest extends IntegrationTestBase {
     }
 
     /**
-     * CASE SEC-004：無效 Token → 401。
+     * CASE SEC-004 / JWT-002 / JWT-003：無效 Token → 401。
      * Given: Bearer not-a-real-token；When: GET /orders；Then: 401。
      */
     @Test

@@ -14,18 +14,18 @@
 | `API規格書.md` | API 端點完整參考 |
 | `docs/architecture.md` | 架構摘要（EOS；指向中文詳文） |
 | `docs/testing.md` | 測試摘要（EOS；指向 Case／CI） |
-| `docs/專案引導教學.html` | 互動架構圖、前後端對照 |
+| `docs/codeGraphic.html` | 互動架構圖、前後端對照 |
 | `docs/前後端串接說明.md` | Vue ↔ Spring Boot API 串接 |
-| `docs/架構學習導引.md` | 學習路線 |
-| `docs/初學者學習說明書.md` | 第一次跑起來 |
-| `docs/功能流程說明.md` | 每個 API 怎麼跑 |
+| `docs/architecture.md` | 學習路線 |
+| `docs/architecture.md` | 第一次跑起來 |
+| `docs/architecture.md` | 每個 API 怎麼跑 |
 | `docs/資料庫設計.md` | ER、JPA、SQL 驗證 |
 | `docs/驗證設計.md` | 四層驗證、錯誤碼 |
-| `docs/測試規格書.md` | Case ID 對照 |
-| `docs/測試與CI.md` | 腳本、DoD |
+| `docs/testing.md` | Case ID 對照 |
+| `docs/testing.md` | 腳本、DoD |
 | `frontend/README.md` | Vue 前端說明 |
 | `server/README.md` | Node BFF 說明 |
-| `CLAUDE.md` | AI 薄規則（EOS 0.1.4） |
+| `CLAUDE.md` | AI 薄規則（EOS 0.1.10） |
 
 ### 參考來源
 
@@ -121,11 +121,12 @@ Base URL：`http://localhost:8083/api/v1`
 
 ## 第 6 章　測試
 
-詳見 [`docs/測試規格書.md`](docs/測試規格書.md)。
+詳見 [`docs/testing.md`](docs/testing.md)。
 
 ```powershell
-.\scripts\check.ps1          # 自動化測試
-.\scripts\verify-db.ps1      # DB smoke（需後端）
+.\scripts\check.ps1          # 單元 + 整合（Gradle check）
+.\gradlew.bat bootRun        # 後端 :8083
+cd frontend; npm run dev     # 前端 :5173
 ```
 
 ---
@@ -135,7 +136,7 @@ Base URL：`http://localhost:8083/api/v1`
 | # | 項目 | 驗證方式 |
 |---|------|----------|
 | 1 | 後端測試全綠 | `.\scripts\check.ps1` |
-| 2 | 登入取得 JWT | Swagger 或 verify-db.ps1 |
+| 2 | 登入取得 JWT | Swagger Authorize 或整合測試 AUTH-001 |
 | 3 | CRUD 五動作 | 整合測試 ORDER-001~008 |
 | 4 | 批次 207 | BATCH-006/007 |
 | 5 | DB 結構正確 | docs/sql/01-schema-verify.sql |
@@ -145,4 +146,4 @@ Base URL：`http://localhost:8083/api/v1`
 
 ---
 
-*最後更新：2026-07-09*
+*最後更新：2026-08-13*

@@ -51,6 +51,7 @@ startup:
     login-path: /login
     default-user: admin
     default-pass: admin123
+    probe: true
 
 springdoc:
   swagger-ui:

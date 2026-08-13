@@ -45,7 +45,7 @@ OrdersView
 
 ```powershell
 # 終端 1：後端
-cd D:\ClaudeCode\TradingCRUD
+cd D:\SouceDemo\RemoteSpringBoot\TradingCRUD
 .\gradlew.bat bootRun
 
 # 終端 2：前端

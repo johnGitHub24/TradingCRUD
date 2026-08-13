@@ -1,4 +1,4 @@
-package com.trading.crud.order;
+package com.trading.crud.integration;
 
 import com.trading.crud.order.infrastructure.OrderRepository;
 import com.trading.crud.support.CrudTestFixtures;
@@ -51,7 +51,7 @@ class OrderBatchIntegrationTest extends IntegrationTestBase {
     }
 
     /**
-     * CASE BATCH-006：批次內重複 clientOrderId → 207、部分成功。
+     * CASE BATCH-006 / SVC-002：批次內重複 clientOrderId → 207、部分成功。
      * Given: 含重複鍵的批次；When: POST /batch；Then: 207、succeeded=2、failed=1、DB=2。
      * 【技巧驗證】HTTP 207 Multi-Status 表達部分失敗。
      */
@@ -70,7 +70,7 @@ class OrderBatchIntegrationTest extends IntegrationTestBase {
     }
 
     /**
-     * CASE BATCH-003：空清單 → 400 VALIDATION_FAILED。
+     * CASE BATCH-003：空清單 → 400 VALIDATION_FAILED（單元層驗證 requested=0）。
      * Given: orders 空；When: POST /batch；Then: 400。
      */
     @Test

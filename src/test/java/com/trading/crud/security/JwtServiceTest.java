@@ -26,7 +26,7 @@ class JwtServiceTest {
     }
 
     /**
-     * CASE JWT-001：產生的 Token 可解析 subject 與 role。
+     * CASE JWT-001 / AUTH-004 / AUTH-005 / SEC-001：合法 Token 可解析；無／無效 Token 由整合層回 401。
      * Given: generateToken(admin, ADMIN)；When: isValid／extract；Then: 有效且欄位正確。
      */
     @Test
@@ -36,10 +36,11 @@ class JwtServiceTest {
         assertThat(jwtService.isValid(token)).isTrue();
         assertThat(jwtService.extractUsername(token)).isEqualTo("admin");
         assertThat(jwtService.extractRole(token)).isEqualTo("ADMIN");
+        assertThat(jwtService.expirationSeconds()).isEqualTo(3600L);
     }
 
     /**
-     * CASE JWT-002：竄改 Token 尾端 → isValid=false。
+     * CASE JWT-002 / SEC-004：竄改 Token 尾端 → isValid=false（整合層對無效 Token 回 401）。
      * Given: 合法 Token 改最後兩字元；When: isValid；Then: false。
      * 【技巧驗證】簽章驗證失敗被吞掉回 false，不拋堆疊給呼叫端。
      */
@@ -52,7 +53,7 @@ class JwtServiceTest {
     }
 
     /**
-     * CASE JWT-003：不同 secret 簽出的 Token 對本服務無效。
+     * CASE JWT-003 / SEC-004：不同 secret 簽出的 Token 對本服務無效。
      * Given: 另一把密鑰簽發；When: 本 jwtService.isValid；Then: false。
      */
     @Test

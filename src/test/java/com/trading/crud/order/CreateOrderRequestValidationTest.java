@@ -49,7 +49,7 @@ class CreateOrderRequestValidationTest {
     }
 
     /**
-     * CASE DTO-001：合法請求無違規。
+     * CASE DTO-001 / ORDER-001：合法請求無違規。
      * Given: 完整合法欄位；When: validate；Then: violations 為空。
      */
     @Test
@@ -59,7 +59,7 @@ class CreateOrderRequestValidationTest {
     }
 
     /**
-     * CASE DTO-002：缺 clientOrderId 有違規。
+     * CASE DTO-002 / ORDER-003：缺 clientOrderId 有違規。
      * Given: clientOrderId=null；When: validate；Then: 違規欄位含 clientOrderId。
      */
     @Test
@@ -72,7 +72,7 @@ class CreateOrderRequestValidationTest {
     }
 
     /**
-     * CASE DTO-003：quantity ≤ 0 有違規。
+     * CASE DTO-003 / ORDER-004：quantity ≤ 0 有違規。
      * Given: quantity=-1；When: validate；Then: 違規欄位含 quantity。
      * 【技巧驗證】{@code @DecimalMin(inclusive=false)} 擋非正數。
      */

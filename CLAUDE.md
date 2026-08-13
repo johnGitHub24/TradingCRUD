@@ -1,7 +1,7 @@
-﻿# TradingCRUD — 專案規則（薄）
+# TradingCRUD — 專案規則（薄）
 
-繼承：EngineeringOS eos-minimal @ 0.1.5  
-公版路徑：`d:\ClaudeCode\EngineeringOS\eos-minimal\`  
+繼承：EngineeringOS eos-minimal @ **0.1.10**  
+公版：`EngineeringOS/eos-minimal/`  
 權威規格：[TradingCRUD 規格書.md](TradingCRUD%20規格書.md)
 
 ## 與公版差異
@@ -16,13 +16,13 @@
 ## 本專案專屬
 
 - Domain: Order CRUD／BATCH、Auth 登入
-- 架構摘要：`docs/architecture.md` → 詳見 `docs/架構學習導引.md`
-- 測試摘要：`docs/testing.md` → 詳見 `docs/測試規格書.md`、`docs/測試與CI.md`
+- 架構摘要：`docs/architecture.md` → 詳見 `docs/architecture.md`
+- 測試摘要：`docs/testing.md` → 詳見 `docs/testing.md`、`docs/testing.md`
 - 教學文件：`docs/` 學習手冊／HTML（不回寫公版）
 
 ## 註解深度
 - comment_verbosity: **detailed**
-- 權威：`EngineeringOS/eos-minimal/knowledge/comments.md` §0／§3b（eos-minimal @ 0.1.5）
+- 權威：`EngineeringOS/eos-minimal/knowledge/comments.md` §0／§3b（eos-minimal @ 0.1.10）
 - 結構：【職責】【技巧】【概念】；簡單 getter 可併入類別說明
 
 
